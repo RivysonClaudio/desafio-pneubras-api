@@ -14,22 +14,23 @@ import com.pneubras.api.dto.request.RegisterRequestDTO;
 import com.pneubras.api.dto.response.LoginResponseDTO;
 import com.pneubras.api.dto.response.RegisterResponseDTO;
 import com.pneubras.api.entity.User;
-import com.pneubras.api.exception.EmailAlreadyExistsException;
+import com.pneubras.api.exception.custom.EmailAlreadyExistsException;
+import com.pneubras.api.mapper.AuthMapper;
 import com.pneubras.api.security.AuthenticatedUser;
 import com.pneubras.api.security.TokenService;
-import com.pneubras.api.service.UserService;
+import com.pneubras.api.security.AuthenticationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
-    private final UserService userService;
+    private final AuthenticationService authService;
 
 
     @PostMapping("/login")
@@ -39,21 +40,18 @@ public class AuthController {
 
         User user = ((AuthenticatedUser) authentication.getPrincipal()).getUser();
         String token = tokenService.generateToken(user);
-        LoginResponseDTO response = new LoginResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getRole(), token);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(AuthMapper.toLoginDTO(user, token));
     }
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponseDTO> register(@RequestBody @Valid RegisterRequestDTO dto) {
 
-        if (userService.findByEmail(dto.email()).isPresent()) {
+        if (authService.findByEmail(dto.email()).isPresent()) {
             throw new EmailAlreadyExistsException();
         }
 
-        User user = userService.register(dto);
-        RegisterResponseDTO response = new RegisterResponseDTO(user.getId(), user.getName(), user.getEmail(), user.getRole());
-        return ResponseEntity.ok(response);
+        User user = authService.register(dto);
+        return ResponseEntity.ok(AuthMapper.toRegisterDTO(user));
     }
 
 }

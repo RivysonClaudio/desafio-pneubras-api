@@ -1,14 +1,12 @@
 package com.pneubras.api.dto.response;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.pneubras.api.entity.UserRole;
 
-public record RegisterResponseDTO(
+public record UserResponseDTO(
     UUID id,
     String name,
     String email,
-    UserRole role,
-    LocalDateTime createdAt
+    UserRole role
 ) {}

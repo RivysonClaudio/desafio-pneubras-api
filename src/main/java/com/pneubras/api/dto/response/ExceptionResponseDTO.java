@@ -2,7 +2,7 @@ package com.pneubras.api.dto.response;
 
 import java.time.LocalDateTime;
 
-public record ErrorResponseDTO(
+public record ExceptionResponseDTO(
     String message,
     LocalDateTime timestamp
 ) {}

@@ -14,19 +14,25 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.pneubras.api.dto.response.ErrorResponseDTO;
+import com.pneubras.api.dto.response.ExceptionResponseDTO;
+import com.pneubras.api.exception.base.BadRequestException;
+import com.pneubras.api.exception.base.ForbiddenException;
+import com.pneubras.api.exception.base.NotFoundException;
+import com.pneubras.api.exception.base.UnauthorizedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponseDTO> handleBadCredentials(BadCredentialsException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponseDTO(ex.getMessage(), LocalDateTime.now()));
+    public ResponseEntity<ExceptionResponseDTO> handleBadCredentials(BadCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponseDTO> handleAccessDenied(AccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponseDTO(ex.getMessage(), LocalDateTime.now()));
+    public ResponseEntity<ExceptionResponseDTO> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -44,8 +50,33 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDTO> handleGeneric(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponseDTO(ex.getMessage(), LocalDateTime.now()));
+    public ResponseEntity<ExceptionResponseDTO> handleGeneric(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ExceptionResponseDTO> handleUnauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ExceptionResponseDTO> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ExceptionResponseDTO> handleNotFoundException(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ExceptionResponseDTO> handleBadRequest(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
     }
 
 }
