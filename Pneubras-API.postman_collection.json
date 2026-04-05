@@ -1,0 +1,281 @@
+{
+  "info": {
+    "name": "Pneubras API",
+    "description": "Coleção alinhada à `SecurityConfiguration` e aos DTOs do projeto.\n\n**Auth**\n- `POST /api/v1/auth/login` — público.\n- `POST /api/v1/auth/register` — exige usuário autenticado com papel **ADMIN** (Bearer JWT).\n\n**Documentação OpenAPI (Swagger)**\n- `GET /swagger-ui/**` e `GET /v3/api-docs/**` — públicos (abrir no navegador, sem JWT).\n\n**Tickets** (`/api/v1/tickets`)\n- Demais rotas exigem JWT.\n- `GET` — lista paginada (`page`, `size`, `sort`). **USER** — próprios tickets, **excluindo** status `CLOSED` e registros removidos (soft delete); **ADMIN** e **AGENT** — todos os não removidos.\n- `POST` — cria ticket (`TicketCreateResquestDTO`).\n- `GET /{id}` — detalhes (USER só se for o criador).\n- `PATCH /{id}` — edita título e descrição (`TicketEditRequestDTO`); mesmas regras de acesso do GET.\n- `PATCH /{id}/status` — altera status; exige **ADMIN** ou **AGENT** (`@PreAuthorize`). Transições: `OPEN` → `IN_PROGRESS` → `RESOLVED` → `CLOSED`. No JSON, o status também aceita aliases em português (`ABERTO`, `EM_PROGRESSO`, `RESOLVIDO`, `FECHADO`).\n- `DELETE /{id}` — remove o ticket; exige papel **ADMIN** (`@PreAuthorize`). Resposta **204 No Content**.\n\nVariáveis: `baseUrl` (padrão `http://localhost:8080`), `token` (preenchido após login), `ticketId` (opcional; após **Create ticket** o script grava o `id` retornado).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "ticketId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const data = pm.response.json();",
+                  "  if (data && data.token) {",
+                  "    pm.collectionVariables.set('token', data.token);",
+                  "  }",
+                  "} catch (e) { /* resposta não JSON */ }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"sua-senha-admin\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "description": "Corpo: `LoginRequestDTO` — email (obrigatório, formato e-mail), password (mín. 8 caracteres).\n\nResposta esperada: `LoginResponseDTO` com `id`, `name`, `email`, `role`, `token`."
+          },
+          "response": []
+        },
+        {
+          "name": "Register (ADMIN)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Novo Usuário\",\n  \"email\": \"usuario@example.com\",\n  \"password\": \"senha12345\",\n  \"role\": \"USER\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register",
+            "description": "Exige JWT de um usuário ADMIN.\n\nCorpo: `RegisterRequestDTO` — name (3–255 chars), email, password (mín. 8), `role`: `ADMIN` | `AGENT` | `USER`.\n\nResposta esperada: `RegisterResponseDTO` com `id`, `name`, `email`, `role`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "List tickets (paginated)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/tickets?page=0&size=20&sort=createdAt,desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "tickets"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Índice da página (0-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "description": "Itens por página"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc",
+                  "description": "Campo e direção (ex.: createdAt,asc)"
+                }
+              ]
+            },
+            "description": "Lista paginada: **USER** — tickets criados por si, **exceto** `CLOSED` e soft-deleted; **ADMIN** e **AGENT** — todos os não removidos.\n\nResposta: página de `TicketResumeResponseDTO` (`id`, `title`, `priority`, `status`, `dueAt`)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "try {",
+                  "  const data = pm.response.json();",
+                  "  if (data && data.id != null) {",
+                  "    pm.collectionVariables.set('ticketId', String(data.id));",
+                  "  }",
+                  "} catch (e) { /* resposta não JSON */ }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Título do chamado\",\n  \"description\": \"Descrição detalhada do problema ou solicitação.\",\n  \"priority\": \"MEDIUM\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tickets",
+            "description": "Corpo: `TicketCreateResquestDTO` — `title` e `description` (3–255 caracteres), `priority`: `LOW` | `MEDIUM` | `HIGH` | `CRITICAL`.\n\nResposta: `TicketDetailsResponseDTO` (`id`, `title`, `description`, `priority`, `status`, `dueAt`, `createdBy`, `createdAt`, `updatedAt`).\n\nApós sucesso, o script de testes grava `id` em `{{ticketId}}`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get ticket by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/tickets/{{ticketId}}",
+            "description": "Detalhes de um ticket. **USER** só acessa se for o criador; **ADMIN** e **AGENT** — qualquer ticket.\n\nUse `{{ticketId}}` (ajuste na coleção ou após **Create ticket**)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update ticket (PATCH)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Título atualizado\",\n  \"description\": \"Nova descrição do chamado.\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tickets/{{ticketId}}",
+            "description": "`PATCH /api/v1/tickets/{id}` — atualiza título e/ou descrição.\n\nCorpo: `TicketEditRequestDTO` — `title` (3–255 caracteres) e `description`; no `TicketService`, apenas valores **não nulos** são aplicados. Mesmas regras de acesso que o GET (**USER** só se for o criador).\n\nResposta: `TicketDetailsResponseDTO`."
+          },
+          "response": []
+        },
+        {
+          "name": "Update ticket status (ADMIN or AGENT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tickets/{{ticketId}}/status",
+            "description": "`PATCH /api/v1/tickets/{id}/status` — exige papel **ADMIN** ou **AGENT** (usuário **USER** recebe 403).\n\nCorpo: `TicketStatusUpdateRequestDTO` — `status` obrigatório. Valores aceitos no enum: `OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED` (também aliases: `ABERTO`, `EM_PROGRESSO`, `RESOLVIDO`, `FECHADO`).\n\nTransições permitidas: `OPEN` → `IN_PROGRESS` → `RESOLVED` → `CLOSED`. Qualquer outra combinação retorna erro de negócio.\n\nExemplo: ticket novo está em `OPEN`; envie `\"IN_PROGRESS\"` ou `\"EM_PROGRESSO\"`. Depois `\"RESOLVED\"` / `\"RESOLVIDO\"`, depois `\"CLOSED\"` / `\"FECHADO\"`.\n\nResposta: `TicketDetailsResponseDTO` (mesmo formato do GET/POST)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete ticket (ADMIN)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/tickets/{{ticketId}}",
+            "description": "`DELETE /api/v1/tickets/{id}` — exige papel **ADMIN** (**AGENT** e **USER** recebem 403).\n\nResposta **204 No Content** em sucesso.\n\nUse `{{ticketId}}` (mesma variável dos outros requests)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
