@@ -1,13 +1,25 @@
 package com.pneubras.api.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.pneubras.api.exception.base.BadRequestException;
 
 public enum TicketStatus {
-    OPEN,
-    IN_PROGRESS,
-    RESOLVED,
-    CLOSED;
+    OPEN("ABERTO"),
+    IN_PROGRESS("EM_PROGRESSO"),
+    RESOLVED("RESOLVIDO"),
+    CLOSED("FECHADO");
+
+    private final String value;
+
+    TicketStatus(String value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public String getPT_BRValue() {
+        return value;
+    }
 
     @JsonCreator
     public static TicketStatus fromString(String value) {

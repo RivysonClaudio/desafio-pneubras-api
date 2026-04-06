@@ -1,13 +1,25 @@
 package com.pneubras.api.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.pneubras.api.exception.base.BadRequestException;
 
 public enum TicketPriority {
-    LOW,
-    MEDIUM,
-    HIGH,
-    CRITICAL;
+    LOW("BAIXA"),
+    MEDIUM("MEDIA"),
+    HIGH("ALTA"),
+    CRITICAL("CRITICA");
+
+    private final String value;
+
+    TicketPriority(String value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public String getPT_BRValue() {
+        return value;
+    }
 
     @JsonCreator
     public static TicketPriority fromString(String value) {
