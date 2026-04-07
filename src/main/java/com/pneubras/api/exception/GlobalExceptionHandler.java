@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -22,6 +24,8 @@ import com.pneubras.api.exception.base.UnauthorizedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ExceptionResponseDTO> handleBadCredentials(BadCredentialsException ex) {
@@ -49,12 +53,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponseDTO> handleGeneric(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
-    }
-
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ExceptionResponseDTO> handleUnauthorized(UnauthorizedException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -79,4 +77,11 @@ public class GlobalExceptionHandler {
             .body(new ExceptionResponseDTO(ex.getMessage(), LocalDateTime.now()));
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ExceptionResponseDTO> handleGeneric(Exception ex) {
+        logger.error("Unhandled exception", ex);
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ExceptionResponseDTO("Internal server error", LocalDateTime.now()));
+    }
 }
