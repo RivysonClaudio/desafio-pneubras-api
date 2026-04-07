@@ -15,6 +15,7 @@ import com.pneubras.api.entity.User;
 import com.pneubras.api.exception.base.UnauthorizedException;
 import com.pneubras.api.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -45,6 +46,7 @@ public class AuthenticationService implements UserDetailsService {
         throw new UnauthorizedException();
     }
 
+    @Transactional
     public User register(RegisterRequestDTO dto) {
         User user = new User();
         user.setName(dto.name());
