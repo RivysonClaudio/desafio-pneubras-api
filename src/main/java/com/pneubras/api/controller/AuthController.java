@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pneubras.api.documentation.AuthControllerDoc;
 import com.pneubras.api.dto.request.LoginRequestDTO;
 import com.pneubras.api.dto.request.RegisterRequestDTO;
 import com.pneubras.api.dto.response.LoginResponseDTO;
@@ -17,34 +18,23 @@ import com.pneubras.api.entity.User;
 import com.pneubras.api.exception.custom.EmailAlreadyExistsException;
 import com.pneubras.api.mapper.AuthMapper;
 import com.pneubras.api.security.AuthenticatedUser;
-import com.pneubras.api.security.TokenService;
 import com.pneubras.api.security.AuthenticationService;
+import com.pneubras.api.security.TokenService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Autenticação", description = "Login e cadastro de usuários. Registro de novos usuários exige JWT de um **ADMIN**.")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthControllerDoc {
 
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
     private final AuthenticationService authService;
 
-
+    @Override
     @PostMapping("/login")
-    @Operation(
-        summary = "Login",
-        description = """
-            Autentica por e-mail e senha. **Não exige JWT.**
-
-            Retorna dados do usuário e o **token** JWT para uso no header `Authorization: Bearer <token>` nas demais rotas.
-            """)
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO dto) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
@@ -54,15 +44,8 @@ public class AuthController {
         return ResponseEntity.ok(AuthMapper.toLoginDTO(user, token));
     }
 
+    @Override
     @PostMapping("/register")
-    @Operation(
-        summary = "Registrar usuário",
-        description = """
-            Cria um novo usuário com papel **ADMIN**, **AGENT** ou **USER**.
-
-            **Exige JWT** de um usuário com papel **ADMIN**. E-mail duplicado retorna erro de negócio.
-            """)
-    @SecurityRequirement(name = "bearer-jwt")
     public ResponseEntity<RegisterResponseDTO> register(@RequestBody @Valid RegisterRequestDTO dto) {
 
         if (authService.findByEmail(dto.email()).isPresent()) {
