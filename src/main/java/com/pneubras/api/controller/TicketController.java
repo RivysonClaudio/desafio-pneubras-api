@@ -41,8 +41,8 @@ public class TicketController implements TicketControllerDoc {
     @Override
     @GetMapping
     public ResponseEntity<Page<TicketResumeResponseDTO>> listTickets(
-            @Parameter(description = "Status do ticket", required = false) @RequestParam(required = false) TicketStatus status,
-            @Parameter(description = "Página", required = false) Pageable pageable
+            @Parameter(description = "Filtro opcional por status (OPEN, IN_PROGRESS, RESOLVED, CLOSED)", required = false) @RequestParam(required = false) TicketStatus status,
+            @Parameter(description = "Paginação e ordenação (`page`, `size`, `sort`)", required = false) Pageable pageable
     ) {
         User user = authenticationService.getUser();
         Page<Ticket> tickets = ticketService.findAll(user, status, pageable);

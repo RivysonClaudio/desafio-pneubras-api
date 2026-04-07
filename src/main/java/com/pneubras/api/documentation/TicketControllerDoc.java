@@ -34,14 +34,20 @@ public interface TicketControllerDoc {
     @Operation(
         summary = "Listar tickets (paginado)",
         description = """
-            Lista paginada de tickets. Query: `page` (0-based), `size`, `sort` (ex.: `createdAt,desc`).
+            Lista paginada de tickets.
+
+            **Query params**
+            - `page` — índice da página (0-based)
+            - `size` — itens por página
+            - `sort` — ordenação (ex.: `createdAt,desc`)
+            - `status` *(opcional)* — filtra por status; use o **nome da constante** do enum (`OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED`). Ex.: `GET .../tickets?status=OPEN&page=0`
 
             **USER**: apenas tickets criados por si, excluindo registros removidos.
             **ADMIN** e **AGENT**: todos os tickets não removidos.
     """)
     public ResponseEntity<Page<TicketResumeResponseDTO>> listTickets(
-            @Parameter(description = "Status do ticket", required = false) @RequestParam(required = false) TicketStatus status,
-            @Parameter(description = "Página", required = false) Pageable pageable);
+            @Parameter(description = "Filtro opcional por status (omitir para listar todos os status permitidos pela regra de negócio)", required = false) @RequestParam(required = false) TicketStatus status,
+            @Parameter(description = "Paginação e ordenação Spring (`page`, `size`, `sort`)", required = false) Pageable pageable);
 
     @Operation(
         summary = "Criar ticket",
