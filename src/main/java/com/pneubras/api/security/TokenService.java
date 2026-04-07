@@ -26,7 +26,6 @@ public class TokenService {
             return JWT.create()
                 .withIssuer("pneubras-api")
                 .withSubject(user.getId().toString())
-                .withClaim("role", user.getRole().name())
                 .withIssuedAt(Instant.now())
                 .withExpiresAt(generateExpirationDate())
                 .sign(algorithm);
