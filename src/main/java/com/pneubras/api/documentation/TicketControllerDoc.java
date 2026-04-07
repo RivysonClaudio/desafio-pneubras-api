@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "Tickets", description = """
+@Tag(name = "2. Tickets", description = """
     CRUD de chamados. Todas as rotas **exigem JWT**.
 
     - **USER**: vê e edita apenas os próprios tickets, excluindo registros removidos.

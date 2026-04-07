@@ -13,7 +13,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-@Tag(name = "Autenticação", description = "Login e cadastro de usuários. Registro de novos usuários exige JWT de um **ADMIN**.")
+@Tag(name = "1. Autenticação", description = """
+    Login e cadastro de usuários. Registro de novos usuários exige JWT de um **ADMIN**.
+""")
 public interface AuthControllerDoc {
 
     @Operation(

@@ -21,9 +21,12 @@ public class SwaggerConfiguration {
                     API REST de chamados (tickets) com autenticação JWT e papéis **ADMIN**, **AGENT** e **USER**.
 
                     **Como testar rotas protegidas**
-                    1. Use **POST /api/v1/auth/login** com email e senha.
-                    2. Copie o `token` da resposta.
-                    3. Clique em **Authorize**, informe: `Bearer <token>` (ou só o token, conforme a UI).
+
+                    1. Use **POST /api/v1/auth/login** com **email** e **senha**.
+
+                    2. Copie o **token** da resposta.
+                    
+                    3. Clique em **Authorize**, informe: **Bearer <token>** (ou só o **token**, conforme a UI).
                     """))
             .components(new Components().addSecuritySchemes("bearer-jwt",
                 new SecurityScheme()
