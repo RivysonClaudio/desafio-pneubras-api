@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.pneubras.api.dto.request.TicketCreateResquestDTO;
+import com.pneubras.api.dto.request.TicketCreateRequestDTO;
 import com.pneubras.api.dto.request.TicketEditRequestDTO;
 import com.pneubras.api.dto.request.TicketStatusUpdateRequestDTO;
 import com.pneubras.api.dto.response.TicketDetailsResponseDTO;
@@ -50,7 +50,7 @@ public interface TicketControllerDoc {
 
             O criador é o usuário autenticado.
     """)
-    public ResponseEntity<TicketDetailsResponseDTO> createTicket(@RequestBody @Valid TicketCreateResquestDTO dto);
+    public ResponseEntity<TicketDetailsResponseDTO> createTicket(@RequestBody @Valid TicketCreateRequestDTO dto);
 
     @Operation(
         summary = "Buscar ticket por id",

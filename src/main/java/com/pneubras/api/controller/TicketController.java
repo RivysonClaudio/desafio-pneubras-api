@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pneubras.api.documentation.TicketControllerDoc;
-import com.pneubras.api.dto.request.TicketCreateResquestDTO;
+import com.pneubras.api.dto.request.TicketCreateRequestDTO;
 import com.pneubras.api.dto.request.TicketEditRequestDTO;
 import com.pneubras.api.dto.request.TicketStatusUpdateRequestDTO;
 import com.pneubras.api.dto.response.TicketDetailsResponseDTO;
@@ -51,7 +51,7 @@ public class TicketController implements TicketControllerDoc {
 
     @Override
     @PostMapping
-    public ResponseEntity<TicketDetailsResponseDTO> createTicket(@RequestBody @Valid TicketCreateResquestDTO dto)
+    public ResponseEntity<TicketDetailsResponseDTO> createTicket(@RequestBody @Valid TicketCreateRequestDTO dto)
     {
         User user = authenticationService.getUser();
         Ticket ticket = ticketService.create(user, dto);

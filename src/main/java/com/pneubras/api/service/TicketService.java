@@ -6,7 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pneubras.api.dto.request.TicketCreateResquestDTO;
+import com.pneubras.api.dto.request.TicketCreateRequestDTO;
 import com.pneubras.api.dto.request.TicketEditRequestDTO;
 import com.pneubras.api.entity.Ticket;
 import com.pneubras.api.entity.TicketStatus;
@@ -33,7 +33,7 @@ public class TicketService {
     }
 
     @Transactional
-    public Ticket create(User user, TicketCreateResquestDTO dto) {
+    public Ticket create(User user, TicketCreateRequestDTO dto) {
         Ticket ticket = new Ticket();
         ticket.setTitle(dto.title());
         ticket.setDescription(dto.description());
