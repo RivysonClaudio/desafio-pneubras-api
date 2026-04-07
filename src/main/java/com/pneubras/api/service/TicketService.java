@@ -24,12 +24,12 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
 
-    public Page<Ticket> findAll(User user, Pageable pageable) 
+    public Page<Ticket> findAll(User user, TicketStatus status, Pageable pageable) 
     {
         if (user.getRole().equals(UserRole.USER)) {
-            return ticketRepository.findByCreatedByAndStatusNotAndDeletedAtIsNull(user, TicketStatus.CLOSED, pageable);
+            return ticketRepository.searchTickets(user, status, pageable);
         }
-        return ticketRepository.findByDeletedAtIsNull(pageable);
+        return ticketRepository.searchTickets(null, status, pageable);
     }
 
     @Transactional
