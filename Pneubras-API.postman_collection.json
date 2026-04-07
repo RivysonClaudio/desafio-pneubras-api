@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Pneubras API",
-    "description": "Coleção alinhada à `SecurityConfiguration` e aos DTOs do projeto.\n\n**Auth**\n- `POST /api/v1/auth/login` — público.\n- `POST /api/v1/auth/register` — exige usuário autenticado com papel **ADMIN** (Bearer JWT).\n\n**Documentação OpenAPI (Swagger)**\n- `GET /swagger-ui/**` e `GET /v3/api-docs/**` — públicos (abrir no navegador, sem JWT).\n\n**Tickets** (`/api/v1/tickets`)\n- Demais rotas exigem JWT.\n- `GET` — lista paginada com filtro opcional `status` (`page`, `size`, `sort`, `status`). **USER** — próprios tickets não removidos; **ADMIN** e **AGENT** — todos os não removidos.\n- `POST` — cria ticket (`TicketCreateResquestDTO`).\n- `GET /{id}` — detalhes (USER só se for o criador).\n- `PATCH /{id}` — edita título e descrição (`TicketEditRequestDTO`); mesmas regras de acesso do GET.\n- `PATCH /{id}/status` — altera status; exige **ADMIN** ou **AGENT** (`@PreAuthorize`). Transições: `OPEN` → `IN_PROGRESS` → `RESOLVED` → `CLOSED`. No JSON, o status também aceita aliases em português (`ABERTO`, `EM_PROGRESSO`, `RESOLVIDO`, `FECHADO`).\n- `DELETE /{id}` — remove o ticket; exige papel **ADMIN** (`@PreAuthorize`). Resposta **204 No Content**.\n\nVariáveis: `baseUrl` (padrão `http://localhost:8080`), `token` (preenchido após login), `ticketId` (opcional; após **Create ticket** o script grava o `id` retornado).",
+    "description": "Coleção alinhada à `SecurityConfiguration` e aos DTOs do projeto.\n\n**Auth**\n- `POST /api/v1/auth/login` — público; resposta inclui `role` no JSON (dados do usuário), não dependa de claim `role` dentro do JWT.\n- `POST /api/v1/auth/register` — exige usuário autenticado com papel **ADMIN** (Bearer JWT).\n\n**Documentação OpenAPI (Swagger)**\n- `GET /swagger-ui/**` e `GET /v3/api-docs/**` — públicos (abrir no navegador, sem JWT).\n\n**Tickets** (`/api/v1/tickets`)\n- Demais rotas exigem JWT.\n- `GET` — lista paginada: query `page`, `size`, `sort` e filtro opcional `status` (**use nomes das constantes do enum:** `OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED`). **USER** — próprios tickets não removidos; **ADMIN** e **AGENT** — todos os não removidos.\n- `POST` — cria ticket (`TicketCreateRequestDTO`).\n- `GET /{id}` — detalhes (USER só se for o criador).\n- `PATCH /{id}` — edita título e/ou descrição (`TicketEditRequestDTO`, campos opcionais; validação com `@Valid`).\n- `PATCH /{id}/status` — altera status; exige **ADMIN** ou **AGENT**. No **body** JSON, `status` aceita enums e aliases PT-BR conforme `TicketStatus`.\n- `DELETE /{id}` — remove o ticket (soft delete); exige **ADMIN**. Resposta **204 No Content**.\n\nVariáveis: `baseUrl` (padrão `http://localhost:8080`), `token` (preenchido após login), `ticketId` (opcional; após **Create ticket** o script grava o `id` retornado).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -129,7 +129,7 @@
                 {
                   "key": "status",
                   "value": "OPEN",
-                  "description": "Filtro opcional por status (`OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED` ou aliases PT-BR)"
+                  "description": "Filtro opcional por status — na query use o nome da constante: OPEN, IN_PROGRESS, RESOLVED, CLOSED"
                 }
               ]
             },
@@ -178,7 +178,7 @@
               "raw": "{\n  \"title\": \"Título do chamado\",\n  \"description\": \"Descrição detalhada do problema ou solicitação.\",\n  \"priority\": \"MEDIUM\"\n}"
             },
             "url": "{{baseUrl}}/api/v1/tickets",
-            "description": "Corpo: `TicketCreateResquestDTO` — `title` e `description` (3–255 caracteres), `priority`: `LOW` | `MEDIUM` | `HIGH` | `CRITICAL`.\n\nResposta: `TicketDetailsResponseDTO` (`id`, `title`, `description`, `priority`, `status`, `dueAt`, `createdBy`, `createdAt`, `updatedAt`).\n\nApós sucesso, o script de testes grava `id` em `{{ticketId}}`."
+            "description": "Corpo: `TicketCreateRequestDTO` — `title` e `description` (3–255 caracteres), `priority` obrigatório (`@NotNull`). No JSON, prioridade aceita nomes em inglês ou aliases aceitos por `TicketPriority` (ex.: `MEDIUM` ou `MÉDIA`).\n\nResposta: `TicketDetailsResponseDTO` (`id`, `title`, `description`, `priority`, `status`, `dueAt`, `createdBy`, `createdAt`, `updatedAt`).\n\nApós sucesso, o script de testes grava `id` em `{{ticketId}}`."
           },
           "response": []
         },
@@ -227,7 +227,7 @@
               "raw": "{\n  \"title\": \"Título atualizado\",\n  \"description\": \"Nova descrição do chamado.\"\n}"
             },
             "url": "{{baseUrl}}/api/v1/tickets/{{ticketId}}",
-            "description": "`PATCH /api/v1/tickets/{id}` — atualiza título e/ou descrição.\n\nCorpo: `TicketEditRequestDTO` — `title` (3–255 caracteres) e `description`; no `TicketService`, apenas valores **não nulos** são aplicados. Mesmas regras de acesso que o GET (**USER** só se for o criador).\n\nResposta: `TicketDetailsResponseDTO`."
+            "description": "`PATCH /api/v1/tickets/{id}` — atualiza título e/ou descrição.\n\nCorpo: `TicketEditRequestDTO` — campos opcionais; quando enviados: `title` 3–255 caracteres, `description` 3–512 caracteres (`@Size`). No serviço, apenas valores **não nulos** são aplicados. Requer `@Valid` no controller. Mesmas regras de acesso que o GET (**USER** só se for o criador).\n\nResposta: `TicketDetailsResponseDTO`."
           },
           "response": []
         },
