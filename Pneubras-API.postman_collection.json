@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Pneubras API",
-    "description": "Coleção alinhada à `SecurityConfiguration` e aos DTOs do projeto.\n\n**Auth**\n- `POST /api/v1/auth/login` — público.\n- `POST /api/v1/auth/register` — exige usuário autenticado com papel **ADMIN** (Bearer JWT).\n\n**Documentação OpenAPI (Swagger)**\n- `GET /swagger-ui/**` e `GET /v3/api-docs/**` — públicos (abrir no navegador, sem JWT).\n\n**Tickets** (`/api/v1/tickets`)\n- Demais rotas exigem JWT.\n- `GET` — lista paginada (`page`, `size`, `sort`). **USER** — próprios tickets, **excluindo** status `CLOSED` e registros removidos (soft delete); **ADMIN** e **AGENT** — todos os não removidos.\n- `POST` — cria ticket (`TicketCreateResquestDTO`).\n- `GET /{id}` — detalhes (USER só se for o criador).\n- `PATCH /{id}` — edita título e descrição (`TicketEditRequestDTO`); mesmas regras de acesso do GET.\n- `PATCH /{id}/status` — altera status; exige **ADMIN** ou **AGENT** (`@PreAuthorize`). Transições: `OPEN` → `IN_PROGRESS` → `RESOLVED` → `CLOSED`. No JSON, o status também aceita aliases em português (`ABERTO`, `EM_PROGRESSO`, `RESOLVIDO`, `FECHADO`).\n- `DELETE /{id}` — remove o ticket; exige papel **ADMIN** (`@PreAuthorize`). Resposta **204 No Content**.\n\nVariáveis: `baseUrl` (padrão `http://localhost:8080`), `token` (preenchido após login), `ticketId` (opcional; após **Create ticket** o script grava o `id` retornado).",
+    "description": "Coleção alinhada à `SecurityConfiguration` e aos DTOs do projeto.\n\n**Auth**\n- `POST /api/v1/auth/login` — público.\n- `POST /api/v1/auth/register` — exige usuário autenticado com papel **ADMIN** (Bearer JWT).\n\n**Documentação OpenAPI (Swagger)**\n- `GET /swagger-ui/**` e `GET /v3/api-docs/**` — públicos (abrir no navegador, sem JWT).\n\n**Tickets** (`/api/v1/tickets`)\n- Demais rotas exigem JWT.\n- `GET` — lista paginada com filtro opcional `status` (`page`, `size`, `sort`, `status`). **USER** — próprios tickets não removidos; **ADMIN** e **AGENT** — todos os não removidos.\n- `POST` — cria ticket (`TicketCreateResquestDTO`).\n- `GET /{id}` — detalhes (USER só se for o criador).\n- `PATCH /{id}` — edita título e descrição (`TicketEditRequestDTO`); mesmas regras de acesso do GET.\n- `PATCH /{id}/status` — altera status; exige **ADMIN** ou **AGENT** (`@PreAuthorize`). Transições: `OPEN` → `IN_PROGRESS` → `RESOLVED` → `CLOSED`. No JSON, o status também aceita aliases em português (`ABERTO`, `EM_PROGRESSO`, `RESOLVIDO`, `FECHADO`).\n- `DELETE /{id}` — remove o ticket; exige papel **ADMIN** (`@PreAuthorize`). Resposta **204 No Content**.\n\nVariáveis: `baseUrl` (padrão `http://localhost:8080`), `token` (preenchido após login), `ticketId` (opcional; após **Create ticket** o script grava o `id` retornado).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -107,7 +107,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/tickets?page=0&size=20&sort=createdAt,desc",
+              "raw": "{{baseUrl}}/api/v1/tickets?page=0&size=20&sort=createdAt,desc&status=OPEN",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "tickets"],
               "query": [
@@ -125,10 +125,15 @@
                   "key": "sort",
                   "value": "createdAt,desc",
                   "description": "Campo e direção (ex.: createdAt,asc)"
+                },
+                {
+                  "key": "status",
+                  "value": "OPEN",
+                  "description": "Filtro opcional por status (`OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED` ou aliases PT-BR)"
                 }
               ]
             },
-            "description": "Lista paginada: **USER** — tickets criados por si, **exceto** `CLOSED` e soft-deleted; **ADMIN** e **AGENT** — todos os não removidos.\n\nResposta: página de `TicketResumeResponseDTO` (`id`, `title`, `priority`, `status`, `dueAt`)."
+            "description": "Lista paginada com filtro opcional `status`.\n\n- **USER**: apenas tickets criados por si e não removidos.\n- **ADMIN** e **AGENT**: todos os tickets não removidos.\n\nResposta: página de `TicketResumeResponseDTO` (`id`, `title`, `priority`, `status`, `dueAt`)."
           },
           "response": []
         },
