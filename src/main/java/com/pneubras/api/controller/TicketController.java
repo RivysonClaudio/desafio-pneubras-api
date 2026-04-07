@@ -72,7 +72,7 @@ public class TicketController implements TicketControllerDoc {
     @PatchMapping("/{id}")
     public ResponseEntity<TicketDetailsResponseDTO> updateTicket(
             @Parameter(description = "Identificador numérico do ticket", required = true) @PathVariable Long id,
-            @RequestBody TicketEditRequestDTO dto
+            @RequestBody @Valid TicketEditRequestDTO dto
     ) {
         User user = authenticationService.getUser();
         Ticket ticket = ticketService.update(user, id, dto);

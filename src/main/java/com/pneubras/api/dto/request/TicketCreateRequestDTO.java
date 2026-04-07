@@ -3,6 +3,7 @@ package com.pneubras.api.dto.request;
 import com.pneubras.api.entity.TicketPriority;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record TicketCreateRequestDTO(
@@ -14,6 +15,6 @@ public record TicketCreateRequestDTO(
     @Size(min = 3, max = 255, message = "Description must be between 3 and 255 characters")
     String description,
 
-    @NotBlank(message = "Priority is required")
+    @NotNull(message = "Priority is required")
     TicketPriority priority
 ) {}
