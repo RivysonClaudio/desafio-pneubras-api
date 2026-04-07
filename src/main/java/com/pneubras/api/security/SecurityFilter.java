@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -42,7 +43,7 @@ public class SecurityFilter extends OncePerRequestFilter{
 
                 User user = userRepository.findById(
                     UUID.fromString(userId))
-                        .orElseThrow(() -> new RuntimeException("User not found")
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found")
                     );
 
                 AuthenticatedUser authenticatedUser = new AuthenticatedUser(user);
