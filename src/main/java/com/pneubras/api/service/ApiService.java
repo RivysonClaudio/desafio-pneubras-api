@@ -27,8 +27,7 @@ public class ApiService {
     public void bootstrap() {
 
         if (userRepository.findByEmail(ADMIN_EMAIL).isPresent()) {
-
-            System.out.println("Admin user already exists");
+            System.out.println("[API - BOOTSTRAP] Admin user already exists");
             return;
         }
 
@@ -40,7 +39,6 @@ public class ApiService {
 
         userRepository.save(user);
 
-        System.out.println("Admin user created: " + user.getEmail());
+        System.out.println("[API - BOOTSTRAP] Admin user created: " + user.getEmail());
     }
-
 }

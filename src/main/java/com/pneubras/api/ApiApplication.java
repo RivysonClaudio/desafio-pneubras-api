@@ -18,9 +18,11 @@ public class ApiApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-		System.out.println("API is running");
+		System.out.println("[API - START] API is running");
 
 		apiService.bootstrap();
+
+		System.out.println("[API - START] API started");
     }
 
 	public static void main(String[] args) {
